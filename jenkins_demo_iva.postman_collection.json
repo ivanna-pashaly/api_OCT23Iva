@@ -1,0 +1,204 @@
+{
+	"info": {
+		"_postman_id": "048f3e53-9cbb-40ea-a87f-463680e35d30",
+		"name": "jenkins_demo_iva",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24933621",
+		"_collection_link": "https://www.postman.com/cloudy-desert-192418/workspace/oct23-ask/collection/24933621-048f3e53-9cbb-40ea-a87f-463680e35d30?action=share&source=collection_link&creator=24933621"
+	},
+	"item": [
+		{
+			"name": "sign-in[T]",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify user role = 'TEACHER'\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"TEACHER\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"tokenTeacher\", jsonData.token);",
+							"",
+							"pm.test(\"Response should be okay to process\", function () {",
+							"    pm.response.to.not.be.error;",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"    pm.response.to.not.have.jsonBody(\"error\");",
+							"});",
+							"",
+							"pm.test(\"Verify teacher email and name\", function () {",
+							"    pm.expect(jsonData.user.name).to.eql(pm.environment.get(\"teacherName\"));",
+							"    pm.expect(jsonData.user.email).to.eql(pm.environment.get(\"teacherEmail\"));",
+							"});",
+							"",
+							"pm.test(\"Response body should be in correct format\", function () {",
+							"    pm.expect(jsonData.user.id).to.be.a('number');",
+							"    pm.expect(jsonData.user.email).to.be.a('string');",
+							"    pm.expect(jsonData.user.name).to.be.a('string');",
+							"    pm.expect(jsonData.user.group).to.be.a('string');",
+							"    pm.expect(jsonData.user.role).to.be.a('string');",
+							"    pm.expect(jsonData.user).to.be.an('object');",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{teacherEmail}}\",\n    \"password\": \"abc123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/sign-in",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "quiz[T]create-new-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"quizID\", jsonData.id);",
+							"",
+							"pm.test(\"response should be okay to process\", function () {",
+							"    pm.response.to.not.be.error;",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"    pm.response.to.not.have.jsonBody(\"error\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenTeacher}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Demo Quiz Iva 11/08/23\",\n    \"totalScore\": 18,\n    \"passingPercentage\": 75,\n    \"showStopperQuestion\": 1,\n    \"questions\": [\n        {\n            \"type\": \"TEXTUAL\",\n            \"question\": \"What is your name?\",\n            \"score\": 5\n        },\n        {\n            \"type\": \"SINGLE_CHOICE\",\n            \"question\": \"Which city is city largest in California?\",\n            \"score\": 7,\n            \"answer\": 2,\n            \"hasOtherOption\": false,\n            \"options\": [\n                \"San Francisco\",\n                \"Sacramento\",\n                \"Los Angeles\",\n                \"Redding\"\n            ]\n        },\n        {\n            \"type\": \"MULTIPLE_CHOICE\",\n            \"question\": \"Who was apple founded by?\",\n            \"score\": 6,\n            \"answers\": [\n                0,\n                1,\n                2\n            ],\n            \"hasOtherOption\": true,\n            \"options\": [\n                \"Steve Jobs\",\n                \"Steve Wozniak\",\n                \"Ronald Wayne\",\n                \"Ronald Reagan\"\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/quiz",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"quiz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "quiz/:id[T]",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"pm.test(\"Verify status and message in responce body\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"success\");",
+							"    pm.expect(jsonData.message).to.eql(\"Quiz was deleted\");",
+							"});",
+							"",
+							"pm.test(\"Response should be okay to process\", function () {",
+							"    pm.response.to.not.be.error;",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"    pm.response.to.not.have.jsonBody(\"error\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenTeacher}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/quiz/{{quizID}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"quiz",
+						"{{quizID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
